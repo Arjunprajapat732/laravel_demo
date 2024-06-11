@@ -2,16 +2,12 @@
 
 namespace App\Http\Controllers\account;
 
-use Spatie\ImageOptimizer\OptimizerChain as Image;
 use App\Http\Controllers\Controller;
 use App\Models\ImageOptimizerTable;
 use Illuminate\Http\Request;
-use ShortPixel\Client;
-use ShortPixel\ShortPixel;
-// use ShortPixel\ShortPixelException;
-// use ShortPixel\ShortPixel\optimize\ImageOpt;
+use Illuminate\Support\Facades\Validator;
 use Tinify\Tinify;
-use Tinify\Source;
+
 
 class ImageOptimizer extends Controller
 {
@@ -21,117 +17,53 @@ class ImageOptimizer extends Controller
 		return view('account.image_optimizer.index', compact('all_images'));
 	}
 
-	public function store(Request $request){
-		$request->validate([
-			'image' => 'required|image',
-		]);
+	public function store(Request $request) {
+		if ($request->hasFile('image')) {
+			$file = $request->file('image');
+			$filename = time() . '.' . $file->getClientOriginalExtension();
+			$filepath = public_path('profile_images/' . $filename);
 
-		$image = $request->file('image');
-		$path = $image->getPathName();
-		\Tinify\setKey(env('TINIFY_API_KEY'));
+			$file->move(public_path('profile_images/'), $filename);
 
-		$compressedPath = storage_path('app/compressed-' . $image->getClientOriginalName());
-		$sourceData = file_get_contents($path);
-		$resultData = \Tinify\fromBuffer($sourceData)->toBuffer();
+			\Tinify\setKey("wNnKpnx4YD80k0NhD66QVqHdfzlvmjYy");
+			$source = \Tinify\fromFile($filepath);
+			$source->toFile($filepath);
+			// $resized = $source->resize(array(
+			// 	"method" => "scale",
+			// 	"width" => $source->width() * 0.5, // Reduce width by 50%
+			// 	"height" => $source->height() * 0.5 // Reduce height by 50%
+			// ));
+			// $resized->toFile($filepath);
 
-		file_put_contents($compressedPath, $resultData);
+			$filesize = filesize($filepath);
+			$size = '';
+			if ($filesize >= 1073741824) {
+				$size = number_format($filesize / 1073741824, 2) . ' GB';
+			} elseif ($filesize >= 1048576) {
+				$size = number_format($filesize / 1048576, 2) . ' MB';
+			} elseif ($filesize >= 1024) {
+				$size = number_format($filesize / 1024, 2) . ' KB';
+			} elseif ($filesize > 1) {
+				$size = $filesize . ' bytes';
+			} elseif ($filesize == 1) {
+				$size = $filesize . ' byte';
+			} else {
+				$size = '0 bytes';
+			}
 
-		return response()->download($compressedPath);	
+			ImageOptimizerTable::create([
+				'filename' => $file->getClientOriginalName(),
+				'path' => $filepath,
+				'filesize' => $size,
+			]);
 
-		// $request->validate([
-		// 	'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-		// ]);
+			return redirect()->back()->with([
+				'success' => 'Image compressed and added',
+				'filename' => $file->getClientOriginalName(),
+				'filesize' => $size,
+			]);
+		}
 
-		// $image = $request->file('image');
-		// $path = $image->store('images', 'public');
-
-
-
-		// try {
-		// 	$imagePath = public_path('storage/' . $path);
-		// 	$imagePathTwo = public_path('storage/short/' . $path);
-
-		// 	$apiKey = config('shortpixel.api_key');
-		// 	$client = new Client(['apiKey' => $apiKey]);
-		// 	$result = $client->fromFile($imagePath)->optimize()->toFiles($imagePathTwo);
-		// 	// dd($result);
-
-		// 	if ($result->succeeded()) {
-		// 		$optimizedImagePath = $result->getDestination();
-		// 		return response()->json([
-		// 			'success' => true,
-		// 			'message' => 'Image optimized successfully!',
-		// 			'data' => $optimizedImagePath,
-		// 		]);
-		// 	} else {
-		// 		return response()->json([
-		// 			'success' => false,
-		// 			'message' => 'Image optimization failed!',
-		// 		]);
-		// 	}
-		// } catch (\Exception $e) {
-		// 	return response()->json([
-		// 		'success' => false,
-		// 		'message' => $e->getMessage(),
-		// 	]);
-		// }
-
-
-
-		// try {
-		// 	$imagePath = public_path('storage/' . $path);
-		// 	$imagePathTwo = public_path('storage/short/' . $path);
-
-		// 	$apiKey = config('shortpixel.api_key');
-		// 	ShortPixel::setKey($apiKey);
-
-		// 	$result = Image::fromFile($imagePath)->optimize();
-
-		// 	if ($result->status['code'] == 2) { // Check if optimization succeeded
-		// 		$result->toFiles($imagePathTwo);
-		// 		$optimizedImagePath = $result->succeeded[0]->DestURL; // Get the optimized image path
-		// 		return response()->json([
-		// 			'success' => true,
-		// 			'message' => 'Image optimized successfully!',
-		// 			'data' => $optimizedImagePath,
-		// 		]);
-		// 	} else {
-		// 		return response()->json([
-		// 			'success' => false,
-		// 			'message' => 'Image optimization failed!',
-		// 		]);
-		// 	}
-		// } catch (\Exception $e) {
-		// 	return response()->json([
-		// 		'success' => false,
-		// 		'message' => $e->getMessage(),
-		// 	]);
-		// }
-
-
-
-		// try {
-		//     $imagePath = public_path('storage/' . $path);
-		//     $result = \ShortPixel\ShortPixel::fromUrls("https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.istockphoto.com%2Fphotos%2Fjodhpur&psig=AOvVaw0ZHdSc3j-PeLB11jNWcnFm&ust=1718095635019000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCPC7lpTT0IYDFQAAAAAdAAAAABAE")->wait(300)->optimize();
-			
-		//     if (isset($result->succeeded[0])) {
-		//         $optimizedImagePath = $result->succeeded[0]->path;
-		//         return response()->json([
-		//             'success' => true,
-		//             'message' => 'Image optimized successfully!',
-		//             'data' => $optimizedImagePath,
-		//         ]);
-		//     } else {
-		//         return response()->json([
-		//             'success' => false,
-		//             'message' => 'Image optimization failed!',
-		//         ]);
-		//     }
-		// } catch (ShortPixelException $e) {
-		//     return response()->json([
-		//         'success' => false,
-		//         'message' => $e->getMessage(),
-		//     ]);
-		// }
+		return redirect()->back()->withErrors(['error' => 'No image file uploaded']);
 	}
 }
