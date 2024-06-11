@@ -55,7 +55,11 @@
 		</div>
 		@foreach($all_images as $image)
 			<div class="card mb-2" style="width: 18rem;">
-				<img class="card-img-top" src="{{ asset('profile_images/' . $image->filename) }}" alt="Card image cap">
+				@if($image->extension != 'pdf')
+					<img class="card-img-top" src="{{ asset('profile_images/' . $image->filename) }}" alt="Card image cap">
+				@else
+					<span><i class="bi bi-file-pdf"></i></span>
+				@endif
 				<div class="card-body">
 					<h5 class="card-title">{{ $image->filename }}</h5>
 					<p class="card-text">{{ $image->filesize }}</p>

@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class ImageOptimizerTable extends Model
 {
     use HasFactory;
-    protected $fillable = ['filename', 'filesize'];
+    protected $fillable = ['filename', 'filesize', 'extension', 'path'];
 }

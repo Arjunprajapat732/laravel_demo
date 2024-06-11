@@ -20,23 +20,20 @@ class ImageOptimizer extends Controller
 	public function store(Request $request) {
 		if ($request->hasFile('image')) {
 			$file = $request->file('image');
-			$filename = time() . '.' . $file->getClientOriginalExtension();
+			$extension = $file->getClientOriginalExtension();
+			$filename = time() . '.' . $extension;
 			$filepath = public_path('profile_images/' . $filename);
 
 			$file->move(public_path('profile_images/'), $filename);
 
-			\Tinify\setKey("wNnKpnx4YD80k0NhD66QVqHdfzlvmjYy");
-			$source = \Tinify\fromFile($filepath);
-			$source->toFile($filepath);
-			// $resized = $source->resize(array(
-			// 	"method" => "scale",
-			// 	"width" => $source->width() * 0.5, // Reduce width by 50%
-			// 	"height" => $source->height() * 0.5 // Reduce height by 50%
-			// ));
-			// $resized->toFile($filepath);
+			if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
+				\Tinify\setKey("wNnKpnx4YD80k0NhD66QVqHdfzlvmjYy");
+				$source = \Tinify\fromFile($filepath);
+				$source->toFile($filepath);
+			}
 
 			$filesize = filesize($filepath);
-			$size = '';
+
 			if ($filesize >= 1073741824) {
 				$size = number_format($filesize / 1073741824, 2) . ' GB';
 			} elseif ($filesize >= 1048576) {
@@ -52,7 +49,8 @@ class ImageOptimizer extends Controller
 			}
 
 			ImageOptimizerTable::create([
-				'filename' => $file->getClientOriginalName(),
+				'filename' => $filename,
+				'extension' => $extension,
 				'path' => $filepath,
 				'filesize' => $size,
 			]);
