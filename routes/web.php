@@ -12,6 +12,7 @@ use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\DropzoneController;
 use App\Http\Controllers\Account\TypeheadController;
 use App\Http\Controllers\Account\DatatableController;
+use App\Http\Controllers\Account\InterventionController;
 use App\Http\Controllers\Account\TablepaginationController;
 
 /*
@@ -64,16 +65,24 @@ Route::group(['prefix' => 'account', 'as' => 'account.'], function() {
 
 		Route::post('/process-payment', [PaymentController::class, 'processpayment_square'])->name('process.payment');
 	});
+
 	Route::group(['prefix' => 'pusher', 'as' => 'pusher.'], function() {
 		Route::get('index', [PusherController::class, 'index']);
 		Route::get('messages', [PusherController::class, 'fetchMessages']);
 		Route::post('messages', [PusherController::class, 'sendMessage']);
 		Route::get('/payment', [PusherController::class, 'payment']); 
 	});
+
 	Route::group(['prefix' => 'image_optimizer', 'as' => 'image_optimizer.'], function() {
 		Route::get('index', [ImageOptimizer::class, 'index']);
 		Route::post('store', [ImageOptimizer::class, 'store']);
 	});
+
+	Route::group(['prefix' => 'intervention_image', 'as' => 'intervention_image.'], function() {
+		Route::get('index', [InterventionController::class, 'index']);
+		Route::post('store', [InterventionController::class, 'store']);
+	});
+
 	Route::get('type_head_js/index', [TypeheadController::class, 'index']);
 });
 
