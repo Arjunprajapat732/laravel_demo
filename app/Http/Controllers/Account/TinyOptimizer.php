@@ -9,12 +9,12 @@ use Illuminate\Support\Facades\Validator;
 use Tinify\Tinify;
 
 
-class ImageOptimizer extends Controller
+class TinyOptimizer extends Controller
 {
 	public function index(Request $request){
 		$all_images = ImageOptimizerTable::all();
 
-		return view('account.image_optimizer.index', compact('all_images'));
+		return view('account.tiny_optimizer.index', compact('all_images'));
 	}
 
 	public function store(Request $request) {
