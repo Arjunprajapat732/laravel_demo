@@ -50,6 +50,9 @@
 		<li class="{{ request()->is('account/tiny_optimizer*') ? 'active' : '' }} rounded-4">
 			<a href="{{ url('account/tiny_optimizer/index') }}">Tiny Optimizer</a>
 		</li>
+		<li class="{{ request()->is('account/image_optimizer*') ? 'active' : '' }} rounded-4">
+			<a href="{{ url('account/image_optimizer/index') }}">Image Optimizer pkg</a>
+		</li>
 		<li class="{{ request()->is('account/intervention_image*') ? 'active' : '' }} rounded-4">
 			<a href="{{ url('account/intervention_image/index') }}">Intervention Image pkg</a>
 		</li>

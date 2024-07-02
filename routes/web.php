@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LoginController;
 // use App\Http\Controllers\TaskController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Account\TinyOptimizer;
 use App\Http\Controllers\Account\TaskController;
 use App\Http\Controllers\Account\PusherController;
 use App\Http\Controllers\Account\PaymentController;
@@ -13,6 +12,8 @@ use App\Http\Controllers\Account\DropzoneController;
 use App\Http\Controllers\Account\TypeheadController;
 use App\Http\Controllers\Account\DatatableController;
 use App\Http\Controllers\Account\InterventionController;
+use App\Http\Controllers\Account\TinyOptimizerController;
+use App\Http\Controllers\Account\ImageOptimizerController;
 use App\Http\Controllers\Account\TablepaginationController;
 
 /*
@@ -74,8 +75,13 @@ Route::group(['prefix' => 'account', 'as' => 'account.'], function() {
 	});
 
 	Route::group(['prefix' => 'tiny_optimizer', 'as' => 'tiny_optimizer.'], function() {
-		Route::get('index', [TinyOptimizer::class, 'index']);
-		Route::post('store', [TinyOptimizer::class, 'store']);
+		Route::get('index', [TinyOptimizerController::class, 'index']);
+		Route::post('store', [TinyOptimizerController::class, 'store']);
+	});
+
+	Route::group(['prefix' => 'image_optimizer', 'as' => 'image_optimizer.'], function() {
+		Route::get('index', [ImageOptimizerController::class, 'index']);
+		Route::post('store', [ImageOptimizerController::class, 'store']);
 	});
 
 	Route::group(['prefix' => 'intervention_image', 'as' => 'intervention_image.'], function() {

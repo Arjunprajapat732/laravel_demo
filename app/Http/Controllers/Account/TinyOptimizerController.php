@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\account;
 
-use App\Http\Controllers\Controller;
-use App\Models\ImageOptimizerTable;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Tinify\Tinify;
+use Illuminate\Http\Request;
+use App\Models\TinyOptimizer;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
 
 
-class TinyOptimizer extends Controller
+class TinyOptimizerController extends Controller
 {
 	public function index(Request $request){
-		$all_images = ImageOptimizerTable::all();
+		$all_images = TinyOptimizer::all();
 
 		return view('account.tiny_optimizer.index', compact('all_images'));
 	}
@@ -22,9 +22,9 @@ class TinyOptimizer extends Controller
 			$file = $request->file('image');
 			$extension = $file->getClientOriginalExtension();
 			$filename = time() . '.' . $extension;
-			$filepath = public_path('profile_images/' . $filename);
+			$filepath = public_path('tiny_images/' . $filename);
 
-			$file->move(public_path('profile_images/'), $filename);
+			$file->move(public_path('tiny_images/'), $filename);
 
 			if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
 				\Tinify\setKey("wNnKpnx4YD80k0NhD66QVqHdfzlvmjYy");
@@ -48,7 +48,7 @@ class TinyOptimizer extends Controller
 				$size = '0 bytes';
 			}
 
-			ImageOptimizerTable::create([
+			TinyOptimizer::create([
 				'filename' => $filename,
 				'extension' => $extension,
 				'path' => $filepath,
