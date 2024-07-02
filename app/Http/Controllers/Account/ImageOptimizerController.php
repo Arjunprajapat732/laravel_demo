@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\account;
 
-use Tinify\Tinify;
 use Illuminate\Http\Request;
 use App\Models\ImageOptimizer;
 use App\Http\Controllers\Controller;
@@ -22,9 +21,9 @@ class ImageOptimizerController extends Controller
 			$file = $request->file('image');
 			$extension = $file->getClientOriginalExtension();
 			$filename = time() . '.' . $extension;
-			$filepath = public_path('profile_images/' . $filename);
+			$filepath = public_path('image_optimizer/' . $filename);
 
-			$file->move(public_path('profile_images/'), $filename);
+			$file->move(public_path('image_optimizer/'), $filename);
 
 			if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
 				\Tinify\setKey("wNnKpnx4YD80k0NhD66QVqHdfzlvmjYy");
