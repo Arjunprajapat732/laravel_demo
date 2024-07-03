@@ -62,7 +62,7 @@
 				@endif
 				<div class="card-body">
 					<h5 class="card-title">{{ $image->filename }}</h5>
-					<p class="card-text">{{ $image->filesize }}</p>
+					<p class="card-text">{{ $image->size }}</p>
 					<a href="#" class="btn btn-primary">Download</a>
 				</div>
 			</div>
