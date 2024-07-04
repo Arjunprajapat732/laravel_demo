@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\TinyOptimizer;
 use App\Http\Controllers\Controller;
 use App\Jobs\CompressImage;
+use Illuminate\Support\Facades\Storage;
 
 class TinyOptimizerController extends Controller
 {
@@ -19,40 +20,40 @@ class TinyOptimizerController extends Controller
     {
         if ($request->hasFile('image')) {
             $file = $request->file('image');
+
+            $original_name = $file->getClientOriginalName();
             $extension = $file->getClientOriginalExtension();
-            $filename = time() . '.' . $extension;
-            $filepath = public_path('tiny_images/' . $filename);
+            $new_name = time() . '.' . $extension; // Unique filename
+            $s3Path = 'attachments_test/' . $new_name;
 
-            $file->move(public_path('tiny_images/'), $filename);
+            // Upload the original image to S3
+            Storage::disk('s3')->putFileAs('attachments_test', $file, $new_name);
 
-            // Dispatch the job with the necessary parameters
-            CompressImage::dispatch($filepath, $extension);
+            // Dispatch job to compress the image
+            CompressImage::dispatch($s3Path, $new_name);
 
-            $filesize = filesize($filepath);
+            // Get file size
+            $filesize = $file->getSize();
             if ($filesize >= 1073741824) {
                 $size = number_format($filesize / 1073741824, 2) . ' GB';
             } elseif ($filesize >= 1048576) {
                 $size = number_format($filesize / 1048576, 2) . ' MB';
             } elseif ($filesize >= 1024) {
                 $size = number_format($filesize / 1024, 2) . ' KB';
-            } elseif ($filesize > 1) {
-                $size = $filesize . ' bytes';
-            } elseif ($filesize == 1) {
-                $size = $filesize . ' byte';
             } else {
-                $size = '0 bytes';
+                $size = $filesize . ' bytes';
             }
 
             TinyOptimizer::create([
-                'filename' => $filename,
+                'filename' => $original_name,
                 'extension' => $extension,
-                'path' => $filepath,
+                'path' => $s3Path,
                 'filesize' => $size,
             ]);
 
             return redirect()->back()->with([
-                'success' => 'Image compressed and added',
-                'filename' => $file->getClientOriginalName(),
+                'success' => 'Image uploaded and compression job dispatched',
+                'filename' => $original_name,
                 'filesize' => $size,
             ]);
         }
