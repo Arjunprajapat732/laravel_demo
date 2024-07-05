@@ -50,6 +50,8 @@ class CompressImage implements ShouldQueue
 
 		Storage::delete($this->temp_path);
 
+		
+		// \Tinify\setKey(env('TINIFY_API_KEY'));
 		// $source = \Tinify\fromUrl(s3Asset($this->store_path));
 		// $source->store(array(
 		// 	"service" => "s3",
