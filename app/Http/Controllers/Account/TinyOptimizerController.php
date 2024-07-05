@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Account;
 
+use Tinify\Tinify;
 use Illuminate\Http\Request;
 use App\Models\TinyOptimizer;
 use App\Http\Controllers\Controller;
@@ -10,54 +11,44 @@ use Illuminate\Support\Facades\Storage;
 
 class TinyOptimizerController extends Controller
 {
-    public function index(Request $request)
-    {
-        $all_images = TinyOptimizer::all();
-        return view('account.tiny_optimizer.index', compact('all_images'));
-    }
+	public function index(Request $request) {
+		$all_images = TinyOptimizer::all();
+		return view('account.tiny_optimizer.index', compact('all_images'));
+	}
 
-    public function store(Request $request)
-    {
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
+	public function store(Request $request) {
+		if ($request->hasFile('image')) {
+			$file = $request->file('image');
+			$originalName = $file->getClientOriginalName();
+			$extension = $file->getClientOriginalExtension();
+			$file_name = time() . $originalName . $extension;
+			$store_path = 'attachments_test/' . $file_name;
 
-            $original_name = $file->getClientOriginalName();
-            $extension = $file->getClientOriginalExtension();
-            $new_name = time() . '.' . $extension; // Unique filename
-            $s3Path = 'attachments_test/' . $new_name;
+			Storage::disk('s3')->putFileAs('attachments_test', $file, $file_name);
 
-            // Upload the original image to S3
-            Storage::disk('s3')->putFileAs('attachments_test', $file, $new_name);
+			if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'WebP'])){
+				$tempPath = $file->storeAs('temp', $file_name);
+				CompressImage::dispatch($tempPath, $file_name, $store_path);
+				// CompressImage::dispatch($store_path, $file_name);
+			}
 
-            // Dispatch job to compress the image
-            CompressImage::dispatch($s3Path, $new_name);
+			$fileSize = $file->getSize();
+			$size = formatFileSize($fileSize);
 
-            // Get file size
-            $filesize = $file->getSize();
-            if ($filesize >= 1073741824) {
-                $size = number_format($filesize / 1073741824, 2) . ' GB';
-            } elseif ($filesize >= 1048576) {
-                $size = number_format($filesize / 1048576, 2) . ' MB';
-            } elseif ($filesize >= 1024) {
-                $size = number_format($filesize / 1024, 2) . ' KB';
-            } else {
-                $size = $filesize . ' bytes';
-            }
+			TinyOptimizer::create([
+				'filename' => $originalName,
+				'extension' => $extension,
+				'path' => $store_path,
+				'filesize' => $size,
+			]);
 
-            TinyOptimizer::create([
-                'filename' => $original_name,
-                'extension' => $extension,
-                'path' => $s3Path,
-                'filesize' => $size,
-            ]);
+			return redirect()->back()->with([
+				'success' => 'Image uploaded and compression job dispatched',
+				'filename' => $originalName,
+				'filesize' => $size,
+			]);
+		}
 
-            return redirect()->back()->with([
-                'success' => 'Image uploaded and compression job dispatched',
-                'filename' => $original_name,
-                'filesize' => $size,
-            ]);
-        }
-
-        return redirect()->back()->withErrors(['error' => 'No image file uploaded']);
-    }
+		return redirect()->back()->withErrors(['error' => 'No image file uploaded']);
+	}
 }
