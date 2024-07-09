@@ -55,6 +55,16 @@
 		<div class="main-content">
 			@include('account.body.layout.header')
 			<div class="container mt-5">
+				@if(session('message'))
+				    <div class="alert alert-success">
+				        {{ session('message') }}
+				    </div>
+				@endif
+				@if(session('error'))
+				    <div class="alert alert-success">
+				        {{ session('error') }}
+				    </div>
+				@endif
 				<div class="card">
 					<div class="card-body">
 						@yield('content')
