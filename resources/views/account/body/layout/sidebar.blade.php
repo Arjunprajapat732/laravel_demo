@@ -1,7 +1,8 @@
 <!-- Inside your 'account.body.layout.sidebar' include file -->
 <style type="text/css">
-	ul li a{
-		margin-left: 15px;
+	#sidebar {
+	    height: 100%;
+	    overflow-y: auto;
 	}
 </style>
 <nav id="sidebar">
