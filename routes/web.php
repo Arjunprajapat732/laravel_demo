@@ -10,6 +10,7 @@ use App\Http\Controllers\Account\PaymentController;
 use App\Http\Controllers\Account\AccountController;
 use App\Http\Controllers\Account\DropzoneController;
 use App\Http\Controllers\Account\TypeheadController;
+use App\Http\Controllers\Account\S3AccessController;
 use App\Http\Controllers\Account\DatatableController;
 use App\Http\Controllers\Account\InterventionController;
 use App\Http\Controllers\Account\TinyOptimizerController;
@@ -87,6 +88,13 @@ Route::group(['prefix' => 'account', 'as' => 'account.'], function() {
 	Route::group(['prefix' => 'intervention_image', 'as' => 'intervention_image.'], function() {
 		Route::get('index', [InterventionController::class, 'index']);
 		Route::post('store', [InterventionController::class, 'store']);
+	});
+
+	Route::group(['prefix' => 's3_policy', 'as' => 's3_policy.'], function() {
+		Route::get('index', [S3AccessController::class, 'index']);
+
+		Route::get('/grant-access', [S3AccessController::class, 'grantAccess'])->name('grant-access');
+		Route::get('/remove-access', [S3AccessController::class, 'removeAccess'])->name('remove-access');
 	});
 
 	Route::get('type_head_js/index', [TypeheadController::class, 'index']);
